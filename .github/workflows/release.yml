@@ -29,5 +29,4 @@ jobs:
         env:
           CR_OWNER: endigma
           CR_GIT_REPO: charts
-          CR_PACKAGE_PATH: .deploy
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
