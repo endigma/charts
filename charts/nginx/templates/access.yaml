@@ -1,0 +1,3 @@
+{{- if .Values.access.enabled -}}
+{{ include "sftpaccess" . }}
+{{- end -}}

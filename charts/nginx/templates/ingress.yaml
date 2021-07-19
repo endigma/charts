@@ -1,0 +1,21 @@
+{{- $config := .Values -}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Values.app.name }}-ingress
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  entryPoints:
+    {{- range .Values.ingress.entrypoints }}
+    - {{ . }}
+    {{- end }}
+
+  routes:
+    {{- range .Values.ingress.routes }}
+    - match: {{ .match }}
+      kind: Rule
+      services:
+        - name: {{ $config.app.name }}
+          port: 80
+    {{- end }}

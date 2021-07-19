@@ -1,0 +1,89 @@
+{{- define "sftpaccess" -}}
+{{- $access := .Values.access -}}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app.name }}-access-keys
+  namespace: nginx
+
+data:
+{{- range .Values.access.publickeys }}
+  {{ .name }}: |
+    {{ .content }}
+{{- end }}
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Values.app.name }}-sftp
+  labels:
+    app: {{ .Values.app.name }}-sftp
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}-sftp
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}-sftp
+    spec:
+      volumes:
+        - name: {{ .Values.app.name }}-access-keys
+          configMap:
+            name: {{ .Values.app.name }}-access-keys
+            defaultMode: 0700
+        - name: {{ .Values.storage.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.name }}
+
+      containers:
+        - name: sftp
+          image: atmoz/sftp:alpine
+          imagePullPolicy: Always
+          args: 
+            - "{{ $access.user.name }}:{{ $access.user.pass }}:{{ $access.user.uid }}:{{ $access.user.gid }}:{{ $access.user.folder }}"
+          ports:
+            - containerPort: 22
+          volumeMounts:
+            - name: {{ .Values.app.name }}-access-keys
+              mountPath: /home/{{ $access.user.name }}/.ssh/keys
+              readOnly: true
+            - name: {{ .Values.storage.name }}
+              mountPath: /home/{{ $access.user.name }}/data
+          securityContext:
+            capabilities:
+              add: ["SYS_ADMIN"]
+          resources: {}
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.app.name }}-sftp
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - name: "ssh"
+      port: 22
+      targetPort: 22
+  selector:
+    app: {{ .Values.app.name }}-sftp
+
+---
+apiVersion: pockost.com/v1beta1
+kind: SSHPipe
+metadata:
+  name: {{ .Values.app.name }}-sftp
+spec:
+  users:
+    - {{ .Values.access.user.name }}-sftp
+  target:
+    name: {{ .Values.app.name }}-sftp
+    
+{{- end }}

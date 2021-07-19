@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "app.name" . }}  
-  namespace: {{ .Values.namespace }}
+  name: {{ .Values.app.name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
     - name: http
-      port: {{ .Values.service.port }}
+      port: {{ .Values.app.port }}
       protocol: TCP
       targetPort: 80
   selector:
-    app: {{ include "app.name" . }}
+    app: {{ .Values.app.name }}

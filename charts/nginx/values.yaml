@@ -1,3 +1,30 @@
-namespace: nginx
-service:
+app:
+  name: nginx
+  namespace: nginx
   port: 80
+
+storage:
+  name: persistent-storage
+  size: 5Gi
+
+ingress:
+  entrypoints:
+    - http
+    - https
+  routes:
+    - match: Host(`nginx.cloudcat.ca`)
+
+access:
+  enabled: true
+  pipeduser: nginx
+  publickeys:
+    - name: endigma
+      content: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxvbwTxNUZkMm9qpJ3xr5pBQgpbkoewhbsRncvWM5VraqsoQzahbvQ5ab4mAmyyNO3zIpNssw66o3WewKMdbZ8dt9iKahB/KQcWMI6RJlPyqUbsdkt31bdnRPlYEXcWwUdeISVyQ6F9z6iriiFG5GYkPikOWoeDXMAt88AUeRngV+YwbSv3QZoJ0rk2SvdJWEB5NHo4zpGzA/sgauBaEOHUiixt+xGYqBc5GO+HoTTV0jvIDUuCgzgMMNnxKKZa5X8vlDZHLO1rQF0FL1rYbC1BtXJijQ+0xu09PsZAM7Ot7dmYJOpaWMMIBmQAlvwOXYjI2JTZ7Af0xlPETxfcpVP end@foreverbox
+  user:
+    name: nginx
+    pass: ""
+    uid: 101
+    gid: 101
+    folder: data
+  
+
